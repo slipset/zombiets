@@ -1,5 +1,5 @@
 import React from "react";
-import { Store, Zombie } from "./types";
+import { Store, Zombie, Tips } from "./types";
 
 const ZombieComp = (zombie: Zombie) => {
   const { kind } = zombie;
@@ -20,8 +20,19 @@ const ZombieComp = (zombie: Zombie) => {
   );
 };
 
-export const Page = ({ zombies }: Store) => {
+const TipsComp = ({ position, header, prose }: Tips) => (
+  <div className="tips">
+    <div className={`tips-box ${position}`}>
+      <div className="tips-arrow"></div>
+      <div className="tips-header">{header}</div>
+      <div className="tips-prose">{prose}</div>
+    </div>
+  </div>
+);
+
+export const Page = ({ zombies, tips }: Store) => {
   const buildings = [];
+
   for (var i = 0; i < 16; i++) {
     buildings.push(i);
   }
@@ -40,6 +51,7 @@ export const Page = ({ zombies }: Store) => {
               <ZombieComp key={i} {...(zombie as unknown as Zombie)} />
             ))}
         </div>
+        {tips && <TipsComp {...tips} />}
       </div>
     </div>
   );
