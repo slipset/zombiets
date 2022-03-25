@@ -23,18 +23,25 @@ const assocIn: any = (m: any, [k, ...p]: Path, v: any) => {
   return { ...n, [k]: assocIn(n[k], p, v) };
 };
 
+const sleep = (time: number) =>
+  new Promise((resolve) => setTimeout(resolve, time * 5));
+
 const performActions = (store: Store, actions: Action[]) => {
-  let newStore = { ...store };
   if (Array.isArray(actions)) {
-    actions.forEach((action: Action) => {
+    return actions.reduce((acc, action) => {
+      console.log("ACTION", action);
       const [op, ...args] = action;
       if (op === "assoc-in") {
         const [path, v] = args;
-        newStore = { ...newStore, ...assocIn(store, path, v) };
+        return { ...acc, ...assocIn(acc, path, v) };
       }
-    });
+      if (op === "wait") {
+        sleep(args[0] as unknown as number);
+        return acc;
+      }
+    }, store);
   }
-  return newStore;
+  return store;
 };
 
 const store$ = of({})
