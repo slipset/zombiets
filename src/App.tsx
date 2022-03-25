@@ -1,45 +1,14 @@
 import React from "react";
-import logo from "./logo.svg";
 import "./App.css";
-import { WebsocketBuilder } from "websocket-ts";
+import { Page } from "./components";
 
-const ws = new WebsocketBuilder("ws://localhost:8666/ws")
-  .onOpen((i, ev) => {
-    console.log("opened");
-  })
-  .onClose((i, ev) => {
-    console.log("closed");
-  })
-  .onError((i, ev) => {
-    console.log("error");
-  })
-  .onMessage((i, ev) => {
-    console.log("message", ev, i);
-  })
-  .onRetry((i, ev) => {
-    console.log("retry");
-  })
-  .build();
+import { webSocket } from "rxjs/webSocket";
+const subject = webSocket("ws://localhost:8666/ws");
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload lol.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+subject.subscribe(
+  (msg) => console.log("message received: " + msg), // Called whenever there is a message from the server.
+  (err) => console.log(err), // Called if at any point WebSocket API signals some kind of error.
+  () => console.log("complete") // Called when connection is closed (for whatever reason).
+);
 
-export default App;
+export default Page;
