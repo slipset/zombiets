@@ -1,3 +1,10 @@
+type Op = string;
+type Value = any;
+
+export type Path = string[];
+
+export type Action = [Op, Path, Value];
+
 export type Zombie = {
   id: string;
   kind: number;
