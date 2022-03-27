@@ -1,9 +1,19 @@
-import { Store, Action, Tips, Path } from "./types";
+import {
+  Store,
+  Action,
+  Tips,
+  Path,
+  Op,
+  AssocIn,
+  Wait,
+  ShowTips,
+  Topic,
+} from "./types";
 import * as bus from "./bus";
 
 const sleep = (time: number, remainingActions: Action[]) =>
   setTimeout(() => {
-    bus.publish(["perform-actions", remainingActions]);
+    bus.publish([Topic.PERFORM_ACTION, remainingActions]);
   }, time);
 
 const assocIn: any = (m: any, [k, ...p]: Path, v: any) => {
@@ -17,6 +27,30 @@ const assocIn: any = (m: any, [k, ...p]: Path, v: any) => {
   return { ...n, [k]: null };
 };
 
+const parseAction = ([op, ...args]: [Op, ...any]) => {
+  if (op === Op.ASSOC_IN) {
+    const [path, v] = args;
+    return {
+      op,
+      path,
+      v,
+    } as AssocIn;
+  }
+  if (op === Op.SHOW_TIPS) {
+    return {
+      op,
+      tips: args[0] as unknown as Tips,
+    } as ShowTips;
+  }
+  if (op === Op.WAIT) {
+    return {
+      op,
+      period: args[0] as unknown as number,
+    } as Wait;
+  }
+  console.log("Unknown Action");
+};
+
 export const performActions = (store: Store, actions: Action[]) => {
   let remainingActions = actions;
   let acc = { ...store };
@@ -24,25 +58,21 @@ export const performActions = (store: Store, actions: Action[]) => {
     while (remainingActions.length != 0) {
       const [action, ...remaining] = remainingActions;
       remainingActions = remaining;
+      const parsedAction = parseAction(action)!;
       console.log("ACTION", action);
-      const [op, ...args] = action;
-      if (op === "assoc-in") {
-        const [path, v] = args;
-        acc = { ...acc, ...assocIn(acc, path, v) };
+      if (parsedAction.op === Op.ASSOC_IN) {
+        acc = { ...acc, ...assocIn(acc, parsedAction.path, parsedAction.v) };
       }
-      if (op === "show-tips") {
-        const tips = {
-          ...args[0],
-          action: [
-            "perform-actions",
-            [["assoc-in", ["tips", null]], ...remainingActions],
-          ],
-        };
-        acc = { ...acc, tips: tips as unknown as Tips };
+      if (parsedAction.op === Op.SHOW_TIPS) {
+        parsedAction.tips.action = [
+          Topic.PERFORM_ACTION,
+          [[Op.ASSOC_IN, ["tips", null]], ...remainingActions],
+        ];
+        acc = { ...acc, tips: parsedAction.tips };
         break;
       }
-      if (op === "wait") {
-        sleep(args[0] as unknown as number, remainingActions);
+      if (parsedAction.op === Op.WAIT) {
+        sleep(parsedAction.period, remainingActions);
         break;
       }
     }

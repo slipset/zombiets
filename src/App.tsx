@@ -5,7 +5,7 @@ import "./App.css";
 import { Page } from "./components";
 import ReactDOM from "react-dom";
 import { performActions } from "./actions";
-import { Action } from "./types";
+import { Action, Topic } from "./types";
 import { webSocket } from "rxjs/webSocket";
 import * as bus from "./bus";
 
@@ -27,7 +27,7 @@ websocket$.subscribe(
 
 const store$ = action$.pipe(scan(performActions, {}));
 
-bus.watch("me", "perform-actions", (actions: Action[]) => {
+bus.watch("me", Topic.PERFORM_ACTION, (actions) => {
   action$.next(actions);
 });
 

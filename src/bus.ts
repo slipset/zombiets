@@ -1,16 +1,20 @@
+import { Topic, Action } from "./types";
+
+type ActionExecutor = (a: Action[]) => void;
+
 type Listener = {
-  topic: string;
-  f: (...a: any[]) => void;
+  topic: Topic;
+  f: ActionExecutor;
 };
 
 const listeners: Record<string, Listener> = {};
 
-export const publish = ([topic, ...args]: any) => {
+export const publish = ([topic, ...args]: [Topic, Action[]]) => {
   console.log(topic, args);
   Object.values(listeners).forEach((l) => {
     topic === l.topic && l.f.apply(null, args);
   });
 };
 
-export const watch = (id: string, topic: string, f: (...a: any[]) => void) =>
+export const watch = (id: string, topic: Topic, f: ActionExecutor) =>
   (listeners[id] = { topic, f });
