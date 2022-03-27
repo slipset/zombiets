@@ -25,11 +25,7 @@ websocket$.subscribe(
   }
 );
 
-const store$ = action$.pipe(
-  scan((s, actions) => {
-    return performActions(s, actions);
-  }, {})
-);
+const store$ = action$.pipe(scan(performActions, {}));
 
 bus.watch("me", "perform-actions", (actions: Action[]) => {
   action$.next(actions);
