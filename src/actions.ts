@@ -1,6 +1,10 @@
 import { Store, Action, Tips, Path } from "./types";
-const sleep = (time: number) =>
-  new Promise((resolve) => setTimeout(resolve, time * 5));
+import * as bus from "./bus";
+
+const sleep = (time: number, remainingActions: Action[]) =>
+  setTimeout(() => {
+    bus.publish(["perform-actions", remainingActions]);
+  }, time);
 
 const assocIn: any = (m: any, [k, ...p]: Path, v: any) => {
   const n = m || {};
@@ -38,7 +42,8 @@ export const performActions = (store: Store, actions: Action[]) => {
         break;
       }
       if (op === "wait") {
-        sleep(args[0] as unknown as number);
+        sleep(args[0] as unknown as number, remainingActions);
+        break;
       }
     }
   }
