@@ -7,8 +7,10 @@ const assocIn: any = (m: any, [k, ...p]: Path, v: any) => {
   if (p.length === 0) {
     return { ...n, [k]: v };
   }
-
-  return { ...n, [k]: assocIn(n[k], p, v) };
+  if (v) {
+    return { ...n, [k]: assocIn(n[k], p, v) };
+  }
+  return { ...n, [k]: null };
 };
 
 export const performActions = (store: Store, actions: Action[]) => {
