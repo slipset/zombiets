@@ -11,8 +11,6 @@ export enum Topic {
 
 export type Path = string[];
 
-export type Action = [Op, ...any];
-
 export type Zombie = {
   id: string;
   kind: number;
@@ -26,28 +24,15 @@ export type Tips = {
   action: [Topic, Action[]];
 };
 
-export type AssocIn = {
-  op: Op.ASSOC_IN;
-  path: string[];
-  v: any;
-};
+export type AssocIn = [Op.ASSOC_IN, string[], any];
 
-export type ShowTips = {
-  op: Op.SHOW_TIPS;
-  tips: Tips;
-};
+export type ShowTips = [Op.SHOW_TIPS, Tips];
 
-export type Wait = {
-  op: Op.WAIT;
-  period: number;
-};
+export type Wait = [Op.WAIT, number];
 
-export type Unknown = {
-  op: Op.UNKNOWN;
-  args: any;
-};
+export type Unknown = [string, ...any];
 
-export type ParsedAction = AssocIn | ShowTips | Wait | undefined;
+export type Action = AssocIn | ShowTips | Wait | Unknown;
 
 export type Player = {
   ["max-health"]: number;

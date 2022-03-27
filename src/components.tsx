@@ -2,24 +2,25 @@ import React from "react";
 import { Player, Store, Zombie, Tips } from "./types";
 import * as bus from "./bus";
 
-const ZombieComp = (zombie: Zombie) => {
-  const { kind } = zombie;
-  const hearts = [];
-  for (var i = 0; i < zombie["max-health"]; i++) {
-    hearts.push(i);
+const range = (i: number) => {
+  const tmp: number[] = [];
+  for (let j = 0; j < i; j++) {
+    tmp.push(j);
   }
-  return (
-    <div className="zombie-position">
-      <div className={`zombie zombie-${kind}`}>
-        <div className="zombie-health">
-          {hearts.map((i) => (
-            <div key={i} className="heart"></div>
-          ))}
-        </div>
+  return tmp;
+};
+
+const ZombieComp = (zombie: Zombie) => (
+  <div className="zombie-position">
+    <div className={`zombie zombie-${zombie.kind}`}>
+      <div className="zombie-health">
+        {range(zombie["max-health"]).map((i) => (
+          <div key={i} className="heart"></div>
+        ))}
       </div>
     </div>
-  );
-};
+  </div>
+);
 
 const TipsComp = ({ position, header, prose, action }: Tips) => (
   <div className="tips" onClick={() => action && bus.publish(action)}>
@@ -31,46 +32,32 @@ const TipsComp = ({ position, header, prose, action }: Tips) => (
   </div>
 );
 
-const PlayerComp = (player: Player) => {
-  const hearts = [];
-  for (var i = 0; i < player["max-health"]; i++) {
-    hearts.push(i);
-  }
+const PlayerComp = (player: Player) => (
+  <div>
+    <div className="player-health">
+      {range(player["max-health"]).map((i) => (
+        <div key={i} className="heart"></div>
+      ))}
+    </div>
+  </div>
+);
 
-  return (
-    <div>
-      <div className="player-health">
-        {hearts.map((i) => (
-          <div key={i} className="heart"></div>
+export const Page = ({ zombies, tips, player }: Store) => (
+  <div className="page">
+    <div className="surface">
+      <div className="skyline">
+        {range(16).map((i) => (
+          <div key={i} className={`building building-${i}`}></div>
         ))}
       </div>
-    </div>
-  );
-};
-export const Page = ({ zombies, tips, player }: Store) => {
-  const buildings = [];
-
-  for (var i = 0; i < 16; i++) {
-    buildings.push(i);
-  }
-
-  return (
-    <div className="page">
-      <div className="surface">
-        <div className="skyline">
-          {buildings.map((i) => (
-            <div key={i} className={`building building-${i}`}></div>
+      <div className="zombies">
+        {zombies &&
+          Object.values(zombies).map((zombie, i) => (
+            <ZombieComp key={i} {...(zombie as unknown as Zombie)} />
           ))}
-        </div>
-        <div className="zombies">
-          {zombies &&
-            Object.values(zombies).map((zombie, i) => (
-              <ZombieComp key={i} {...(zombie as unknown as Zombie)} />
-            ))}
-        </div>
-        {player && <PlayerComp {...player} />}
-        {tips && <TipsComp {...tips} />}
       </div>
+      {player && <PlayerComp {...player} />}
+      {tips && <TipsComp {...tips} />}
     </div>
-  );
-};
+  </div>
+);

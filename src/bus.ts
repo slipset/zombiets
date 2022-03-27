@@ -16,5 +16,5 @@ export const publish = ([topic, ...args]: [Topic, Action[]]) => {
   });
 };
 
-export const watch = (id: string, topic: Topic, f: ActionExecutor) =>
+export const watch = (id: string, topic: Topic, f: (a: Action[]) => void) =>
   (listeners[id] = { topic, f });
