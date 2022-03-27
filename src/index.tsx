@@ -3,11 +3,12 @@ import { scan } from "rxjs/operators";
 import { Page } from "./components";
 import ReactDOM from "react-dom";
 import { performActions } from "./actions";
-import { Action, Topic } from "./types";
+import { Action, Topic, Store } from "./types";
 import { webSocket } from "rxjs/webSocket";
 import * as bus from "./bus";
 
 const websocket$ = webSocket("ws://localhost:8666/ws");
+const container = document.getElementById("root");
 
 const action$ = new Subject<Action[]>();
 const error = (msg: string) => (e: any) => console.log(`${msg}: ERROR`, e);
@@ -26,14 +27,8 @@ websocket$.subscribe(
 
 const store$ = action$.pipe(scan(performActions, {}));
 
-bus.watch("me", Topic.PERFORM_ACTION, (actions) => {
-  action$.next(actions);
-});
+bus.watch("me", Topic.PERFORM_ACTION, (actions) => action$.next(actions));
 
-store$.subscribe(
-  (s) => {
-    ReactDOM.render(<Page {...s} />, document.getElementById("root"));
-  },
-  error("STORE"),
-  complete("STORE")
-);
+const render = (s: Store) => ReactDOM.render(<Page {...s} />, container);
+
+store$.subscribe(render, error("STORE"), complete("STORE"));
